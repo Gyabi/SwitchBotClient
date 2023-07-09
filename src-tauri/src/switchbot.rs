@@ -1,44 +1,66 @@
-// SwitchBotのAPIを実行するモジュール
-// 実行用にSwitchBotAPIClient構造体を定義する
+// SwitchBotのAPIを叩く関数の集合
 
-use reqwest::blocking::Client;
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::vec;
 
-pub struct SwitchBotAPIClient {
-    token: String,
+use reqwest::header::HeaderMap;
+use uuid::Uuid;
+use reqwest::{
+    self,
+    header::{AUTHORIZATION, CONTENT_TYPE},
+};
+use chrono::Utc;
+use ring::hmac;
+use base64::{Engine as _, engine::general_purpose};
+use serde::Deserialize;
+
+// URLを変数として保持
+const SWITCH_BOT_API_URL: &str = "https://api.switch-bot.com/v1.1";
+
+// デバイスを示す構造体
+#[derive(serde::Deserialize, serde::Serialize, Debug)]
+pub(crate) struct Device {
     device_id: String,
-    client: Client,
+    device_name: String,
+    device_type: String,
+    enable_cloud_service: bool,
+    hub_device_id: String
 }
 
-impl SwitchBotAPIClient {
-    pub fn new(token: String, device_id: String) -> Self {
-        Self {
-            token,
-            device_id,
-            client: Client::new(),
-        }
-    }
+// デバイスのリストを出力する関数
+pub(crate) async fn get_device_list(token: &str, secret:&str) -> Result<Vec<Device>, reqwest::Error> {
+    // reqwestクレートを用いてAPIを叩く
+    let url = format!("{}/devices", SWITCH_BOT_API_URL);
+    let client = reqwest::Client::new();
 
-    pub fn execute(&self, command: &str) -> Result<ExecuteResponse, reqwest::Error> {
-        let mut map = HashMap::new();
-        map.insert("command", command);
+    // ヘッダーを作成
+    let headers = create_header(token, secret);
 
-        let url = format!(
-            "https://api.switch-bot.com/v1.0/devices/{}/commands",
-            self.device_id
-        );
+    // APIを叩く
+    let res = client.get(url).headers(headers).send().await;
 
-        let res = self
-            .client
-            .post(&url)
-            .header("Authorization", &self.token)
-            .json(&map)
-            .send()?
-            .text()?;
+    // レスポンスからbodyを取り出して表示
+    let body = res?.text().await?;
+    println!("{}", body);
 
-        let res: ExecuteResponse = serde_json::from_str(&res)?;
+    Ok(vec![])
+}
 
-        Ok(res)
-    }
+// ヘッダーを作成する共用関数
+fn create_header(token: &str, secret:&str) -> HeaderMap {
+    let t = Utc::now().timestamp_millis();
+    let nonce = Uuid::new_v4().to_string();
+    let sign = {
+        let key = hmac::Key::new(ring::hmac::HMAC_SHA256, secret.as_bytes());
+        let data = format!("{}{}{}", token, t, nonce);
+        let sign = hmac::sign(&key, data.as_bytes());
+        general_purpose::STANDARD.encode(sign.as_ref())
+    };
+
+    let mut headers = HeaderMap::new();
+    headers.insert(AUTHORIZATION, token.parse().unwrap());
+    headers.insert("sign", sign.parse().unwrap());
+    headers.insert("t", t.to_string().parse().unwrap());
+    headers.insert("nonce", nonce.parse().unwrap());
+
+    headers
 }
