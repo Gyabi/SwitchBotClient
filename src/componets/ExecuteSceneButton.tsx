@@ -27,7 +27,7 @@ export const ExecuteSceneButton: React.FC<Props> = ({data}) => {
     <div>
         {/* 押下時にexecuteを呼び出すボタン */}
         {loading && <div>Loading...</div>}
-        <button onClick={execute}>{executeMsg}</button>
+        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={execute}>{executeMsg}</button>
     </div>
   );
 };
