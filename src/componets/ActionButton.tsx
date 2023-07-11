@@ -13,7 +13,7 @@ export const ActionButton: React.FC<Props> = ({ num }) => {
 
   async function execute() {
     // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-    console.log(await invoke("execute", { num }).then((res) => res));
+    console.log(await invoke("sample").then((res) => res));
   }
 
   return (
