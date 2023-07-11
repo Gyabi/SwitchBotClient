@@ -19,7 +19,7 @@ use param::{get_parameter, set_parameter};
 
 
 // パラメータ関連
-#[tauri::command]
+#[tauri::command(rename_all = "snake_case")]
 async fn save_parameter(parameter: Parameter) -> Result<(), String> {
     let err = set_parameter(parameter);
     match err {
@@ -32,7 +32,7 @@ async fn save_parameter(parameter: Parameter) -> Result<(), String> {
 }
 
 // シーン関連
-#[tauri::command]
+#[tauri::command(rename_all = "snake_case")]
 async fn execute_scene(scene_id: String) -> Result<(), String> {
     // パラメータ読み込み
     let _param = get_parameter().unwrap();
@@ -77,7 +77,7 @@ async fn get_infrared_remotes() -> Result<Vec<InfraredRemote>, String> {
 }
 
 // 無線デバイスのオンオフ
-#[tauri::command]
+#[tauri::command(rename_all = "snake_case")]
 async fn execute_infrated_remote_enable(device_id: String, enable: bool) -> Result<(), String> {
     // パラメータ読み込み
     let _param = get_parameter().unwrap();
@@ -93,7 +93,7 @@ async fn execute_infrated_remote_enable(device_id: String, enable: bool) -> Resu
 }
 
 // エアコンの操作
-#[tauri::command]
+#[tauri::command(rename_all = "snake_case")]
 async fn execute_infrated_airconfitioner_command(device_id: &str, temperature: u16, mode: AirCondModeSettingValue, fan_speed: AirCondFanSpeedSettingValue, power_state: bool) -> Result<(), String> {
     // パラメータ読み込み
     let _param = get_parameter().unwrap();
