@@ -4,7 +4,6 @@ import { tauri } from "@tauri-apps/api";
 import { ExecuteSceneButton } from "../ExecuteSceneButton";
 import MessageDialog from "../MessageDialog";
 
-// デバッグ用にテキストを返却
 const SceneTab = () => {
     const [scenes, setScenes] = useState<Scene[]>([]);
     // ダイアログ制御用変数
