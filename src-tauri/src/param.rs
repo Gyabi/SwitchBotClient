@@ -5,6 +5,7 @@ use confy::ConfyError;
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub(crate) struct Parameter {
     pub token: String,
     pub secret: String,

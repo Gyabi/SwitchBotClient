@@ -1,6 +1,7 @@
 use super::utils::{create_header, SWITCH_BOT_API_URL};
 use reqwest;
 use serde::{Deserialize, Serialize};
+use std::error::Error;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -39,7 +40,7 @@ pub(crate) struct InfraredRemote {
 }
 
 // 無線デバイスのリストを出力する関数
-pub(crate) async fn get_infrared_remote_list(token: &str, secret:&str) -> Result<Vec<InfraredRemote>, reqwest::Error> {
+pub(crate) async fn get_infrared_remote_list(token: &str, secret:&str) -> Result<Vec<InfraredRemote>, Box<dyn Error>> {
     // reqwestクレートを用いてAPIを叩く
     let url = format!("{}/devices", SWITCH_BOT_API_URL);
     let client = reqwest::Client::new();
@@ -48,18 +49,27 @@ pub(crate) async fn get_infrared_remote_list(token: &str, secret:&str) -> Result
     let headers = create_header(token, secret);
 
     // APIを叩く
-    let res = client.get(url).headers(headers).send().await.expect("Failed to get infrared remote list");
+    let res = client.get(url).headers(headers).send().await;
+    // resのステータスコードを使ってエラー処理
+    match res {
+        Ok(data) => {
+            if data.status().is_success() {
+                // レスポンスからbodyからinfraredRemoteListをInfraredRemoteのリストとして取り出す
+                let get_device_response: GetDeviceResponse = data.json().await.expect("Failed to parse get infrared remote list response");
 
-    // レスポンスからbodyからinfraredRemoteListをInfraredRemoteのリストとして取り出す
-    let get_device_response: GetDeviceResponse = res.json().await.expect("Failed to parse get infrared remote list response");
-
-    // 返却
-    Ok(get_device_response.body.infrared_remote_list)
+                // 返却
+                Ok(get_device_response.body.infrared_remote_list)
+            } else {
+                Err("Failed to get infrared remote list".into())
+            }
+        },
+        Err(e) => Err(e.into())
+    }
 }
 
 // 無線デバイスのオンオフ 戻り値はResultでOkなら中身はなし、Errorならreqwest::Error
 // ボディにはcommandType,Command,commandparameterを入れる
-pub(crate) async fn infrated_remote_status_switch(token: &str, secret:&str, device_id: &str, enable: bool) -> Result<(), reqwest::Error>{
+pub(crate) async fn infrated_remote_status_switch(token: &str, secret:&str, device_id: &str, enable: bool) -> Result<(), Box<dyn Error>>{
     // reqwestクレートを用いてAPIを叩く
     let url = format!("{}/devices/{}/commands", SWITCH_BOT_API_URL, device_id);
     let client = reqwest::Client::new();
@@ -71,14 +81,17 @@ pub(crate) async fn infrated_remote_status_switch(token: &str, secret:&str, devi
     let body = format!("{{\"commandType\":\"command\",\"command\":\"{}\",\"parameter\":\"default\"}}", if enable { "turnOn" } else { "turnOff" });
 
     // APIを叩く
-    let res = client.post(url).headers(headers).body(body).send().await.expect("Failed to switch infrared remote status");
-
-    // ステータスコードに応じてboolを返す
-    let status_code = res.status().as_u16();
-    if status_code == 200 {
-        Ok(())
-    } else {
-        Err(res.error_for_status().unwrap_err())
+    let res = client.post(url).headers(headers).body(body).send().await;
+    // resのステータスコードを使ってエラー処理
+    match res {
+        Ok(data) => {
+            if data.status().is_success() {
+                Ok(())
+            } else {
+                Err("Failed to switch infrared remote status".into())
+            }
+        },
+        Err(e) => Err(e.into())
     }
 }
 
@@ -112,7 +125,7 @@ pub(crate) enum AirCondFanSpeedSettingValue {
 }
 // エアコンの設定値を反映させる
 // ボディにはcommandType,Command,commandparameterを入れる
-pub(crate) async fn infrated_airconfitioner_command(token: &str, secret:&str, device_id: &str, temperature: u16, mode: AirCondModeSettingValue, fan_speed: AirCondFanSpeedSettingValue, power_state: bool) -> Result<(), reqwest::Error> {
+pub(crate) async fn infrated_airconfitioner_command(token: &str, secret:&str, device_id: &str, temperature: u16, mode: AirCondModeSettingValue, fan_speed: AirCondFanSpeedSettingValue, power_state: bool) -> Result<(), Box<dyn Error>> {
     // reqwestクレートを用いてAPIを叩く
     let url = format!("{}/devices/{}/commands", SWITCH_BOT_API_URL, device_id);
     let client = reqwest::Client::new();
@@ -141,13 +154,16 @@ pub(crate) async fn infrated_airconfitioner_command(token: &str, secret:&str, de
     let body = format!("{{\"commandType\":\"command\",\"command\":\"setAll\",\"parameter\":\"{}\"}}", _parameter);
 
     // APIを叩く
-    let res = client.post(url).headers(headers).body(body).send().await.expect("Failed to switch infrared remote status");
-
-    // ステータスコードに応じてboolを返す
-    let status_code = res.status().as_u16();
-    if status_code == 200 {
-        Ok(())
-    } else {
-        Err(res.error_for_status().unwrap_err())
+    let res = client.post(url).headers(headers).body(body).send().await;
+    // resのステータスコードを使ってエラー処理
+    match res {
+        Ok(data) => {
+            if data.status().is_success() {
+                Ok(())
+            } else {
+                Err("Failed to switch infrared remote status".into())
+            }
+        },
+        Err(e) => Err(e.into())
     }
 }
