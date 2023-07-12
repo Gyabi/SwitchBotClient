@@ -29,7 +29,7 @@ const SceneTab = () => {
 
     return (
         // シーンデータを画面内に並べる
-        <div className="grid grid-cols-4 gap-4 w-screen">
+        <div className="grid grid-cols-4 gap-4 w-screen py-5">
             {/* ExecuteSceneButtonを並べる */}
             {scenes.map((scene, index) => (
                 <ExecuteSceneButton key={index} data={scene}/>

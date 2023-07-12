@@ -42,11 +42,13 @@ const SettingTab = () => {
                         <input id="Secret" className="w-1/2" type="text" placeholder="Secret" />
                     </div>
                 </div>
-                {/* 実行ボタン */}
-                <div className="flex justify-center items-center">
-                    {/* onClickでTokenとsecretを取得して、updateTokenAndSecretに渡す */}
-                    <button className="col-span-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onClick={() => updateTokenAndSecret((document.getElementById("Token") as HTMLInputElement).value, (document.getElementById("Secret") as HTMLInputElement).value)}>Save</button>
-                </div>                    
+                <div className="col-span-2">
+                    {/* 実行ボタン */}
+                    <div className="flex justify-center items-center">
+                        {/* onClickでTokenとsecretを取得して、updateTokenAndSecretに渡す */}
+                        <button className="col-span-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onClick={() => updateTokenAndSecret((document.getElementById("Token") as HTMLInputElement).value, (document.getElementById("Secret") as HTMLInputElement).value)}>Save</button>
+                    </div>                    
+                </div>
             </div>
 
             {/* ダイアログ */}

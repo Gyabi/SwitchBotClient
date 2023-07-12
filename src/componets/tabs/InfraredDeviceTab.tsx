@@ -32,7 +32,7 @@ const InfraredDeviceTab = () => {
 
     return (
         // 赤外線デバイスデータを画面内に並べる
-        <div className="grid grid-cols-4 gap-4 w-screen">
+        <div className="grid grid-cols-4 gap-4 w-screen py-5">
             {/* InfraredLightCardを並べる */}
             {infraredDevices.map((infraredDevice, index) => (
                 <InfraredLightCard key={index} data={infraredDevice}/>
