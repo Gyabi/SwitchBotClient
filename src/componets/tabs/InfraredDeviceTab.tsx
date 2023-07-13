@@ -6,6 +6,7 @@ import { tauri } from "@tauri-apps/api";
 import InfraredLightCard from "../InfraredLightCard";
 import MessageDialog from "../MessageDialog";
 import { InfraredRemote } from "../../data/InfraredRemote";
+import InfaredAirConditionerCard from "../InfraredAirConditionerCard";
 
 const InfraredDeviceTab = () => {
     const [infraredDevices, setInfraredDevices] = useState<InfraredRemote[]>([]);
@@ -33,10 +34,24 @@ const InfraredDeviceTab = () => {
     return (
         // 赤外線デバイスデータを画面内に並べる
         <div className="grid grid-cols-4 gap-4 w-screen py-5">
-            {/* InfraredLightCardを並べる */}
-            {infraredDevices.map((infraredDevice, index) => (
-                <InfraredLightCard key={index} data={infraredDevice}/>
-            ))}
+            {/* InfraredLightCardとInfraredAirConditionerCardをtypeで識別して並べる */}
+            {infraredDevices.map((infraredDevice: InfraredRemote, index) => {
+                if (infraredDevice.remoteType === "Light") {
+                    return (
+                        <InfraredLightCard
+                            key={index}
+                            data={infraredDevice}
+                        />
+                    );
+                } else if (infraredDevice.remoteType === "Air Conditioner") {
+                    return (
+                        <InfaredAirConditionerCard
+                            key={index}
+                            data={infraredDevice}
+                        />
+                    );
+                }
+            })}
 
             {/* リロードボタンを設ける */}
             <div className="flex justify-center items-center">
